@@ -1,287 +1,178 @@
-# Strings
-nombre = "Axel"
-letra = nombre
+from flask import Flask, render_template, request
+from transformers import pipeline
+import ply.lex as lex
+import ply.yacc as yacc
 
-print(letra)
+app = Flask(__name__)
 
-# ciclos
-for letra in nombre:
-    print(letra)
+# Definición de tokens
+tokens = (
+    'NUMERO',
+    'SUMA',
+    'RESTA',
+    'MULTIPLICACION',
+    'DIVISION',
+    'PARENTESIS_IZQ',
+    'PARENTESIS_DER',
+)
 
-texto = "En la fuente habia un chorrito"
-if "chorrito" in texto:
-    print("chorrito")
+# Expresiones regulares para los tokens
+t_SUMA = r'\+'
+t_RESTA = r'-'
+t_MULTIPLICACION = r'\*'
+t_DIVISION = r'/'
+t_PARENTESIS_IZQ = r'\('
+t_PARENTESIS_DER = r'\)'
 
+# Ignorar espacios en blanco y tabulaciones
+t_ignore = ' \t'
 
-# Del sig Texto
-# "Son las 7 de la noche y ya me quiero ir"
-# Si Encuentra el Numero 7 y es menor a 8
-# imprimir el numero 7 convertidp a INT
-# y el texto, "Es hora de irnos son las : 7"
+# Definición de la regla para el token NUMERO
+def t_NUMERO(t):
+    r'\d+'
+    t.value = int(t.value)
+    return t
 
-texto = "Son las 7 de la noche y ya me quiero ir"
-if "7" in texto:
-    num = 7
-    if num<8:
-        print("Es hora de irnos son las " + str(num))
+# Variables para almacenar caracteres no reconocidos y mensajes de error de sintaxis
+caracteres_no_reconocidos = []
 
-## Slicing String
-b = "Hola Mundo"
-c = b[5:10]
-print(c)
-# Slicing por rango
-print(b[5:9])
-# Slicing desde el Inicio
-print(b[:5])
-# Slicing desde una posicion
-print(b[5:])
-# Slicing desde una posicion negativa
-print(b[-5:-1])
+# Variable para controlar si se debe imprimir el resultado
+imprimir_resultado = True
 
-## Boleanos
-# Mayor que
-print(10>9)
-# Igual que
-print(10==9)
-# Menor que
-print(10<9)
-
-# variables boleanas
-enStock = True
-isTiendaAbierta = True
-
-if enStock and isTiendaAbierta:
-    print("VENDER PRODUCTOS")
-
-tieneEfectivo = False
-tieneTarjeta = True
-if tieneTarjeta or tieneEfectivo:
-    print("PAGO ACEPTADO")
+# Manejo de errores
+def t_error(t):
+    global caracteres_no_reconocidos
+    global imprimir_resultado
+    caracteres_no_reconocidos.append(t.value[0])
+    imprimir_resultado = False
+    t.lexer.skip(1)
 
 
-regresateConfEx = False
-if not regresateConfEx:
-    print("MENTIROSO!")
-
-paseLenguajes = False
-if not paseLenguajes:
-    print("FALSO")
-
-isUpload = True
-if not isUpload:
-    print("REINTENTAR")
-
-
-# operadores aritmeticos
-x = 10
-y = 5
-
-# suma
-print(x + y)
-
-# Resta
-print(x - y)
-
-# Multiplicacion
-print(x * y)
-
-# Division
-print(x / y)
-
-# Modulo
-print(x % y)
-
-# Exponentes
-print(2 ** 2)
-print(x ** 2)
-print(x ** y)
-
-# floor division
-print(4 // 2)
-print(x // y)
-
-
-# Operadores de asignacion
-x = 30
-x += 32
-x -= 2
-x *= 2
-x /= 2
-print(x)
-
-# Operadores logicos de comparacion
-a = 3
-b = 2
-
-# Igual
-print(a == b)
-# Diferente
-print(a != b)
-# Mayor
-print(a > b)
-# Menor
-print(a < b)
-# Mayor igual
-print(a >= b)
-# Menor igual
-print(a <= b)
-
-
-# Operadores Logicos
-
-promedio = 100
-asistencias = True
-aprobado = (promedio > 70 ) and asistencias
-# and, or, not
-print(aprobado)
-
-
-# Operadores de identidad
-
-j = "HOLA"
-k = "HOLA"
-print(j is k.replace("",""))
-print(j is not k)
-
-# Operadores de pertenencia
-
-print("A" in "HOLA")
-print("A" not in "HOLA")
-
-# Lista
-
-frutas = ["Manzana","Banana", "Mango"]
-frutas2 = ["🍎", "🍌", "🥭"]
-print(frutas)
-print(frutas2)
-lista = [1,2,3,4,5,6]
-logico = [True, False, True]
-lista1 = ["abc", 34, True,'a', "🍎" ]
-print(type(lista1))
-print(lista1)
-
-# List, Tuple, Set, Dictionary
-
-"""
-List: es una coleccion la cual esta ordenada
-y muteable, la cual permite duplicados
-"""
-"""
-Tuple: Es una coleccion la cual esta ordenada y no es un
-modificable. Permite duplicados
-
-Set: Es una coleccion la cual NO esta ordenada y no es un
-modificable ni Indexada. NO permite duplicados 
-
-Diccionario: Es una coleccion la cual esta ordenada
-es modificable. No permite duplicados
-
-"""
-# Lista
-lista1 = ["🐥", "🙊", "🐷", "🐷", "🐷"]
-lista1.insert(3, "🐶")
-lista1[2] = "🐯"
-print(lista1)
-# Tupla
-tupla1 = ("🐥", "🙊", "🐷", "🐷")
-print(tupla1)
-# Set
-set1 = {"🐥", "🙊", "🐷"}
-set1.add("🐨")
-set1.add("🐙")
-print(set1)
-# Diccionario
-diccionario1 = {
-    "pollo": "🐥",
-    "monito": "🙊",
-    "cerdito": "🐷"
-}
-diccionario1["koala"] = "🐨"
-diccionario1["tigre"] = "🐯"
-print(diccionario1["monito"])
-print(diccionario1)
-
-iturralde = diccionario1["pollo"]
-
-print(iturralde)
-
-# 0.- Crear una lista : 1, 2, 5, 3, 2, 3, 3, 6, 10, 8,
-# 1.- Convertir la lista en un set para eliminar duplicados
-# 2.- Calcular la suma de los numeros usando una lista
-# 3.- Calcular la suma de los numeros usando un Set
-# 4.- Crear un diccionario para almacenar las estadisticas, numeros unicos, suma total lista
-#    y suma total Set Maximo valor, minimo valor Imprimir las estadisticas
-
-ListaNumero = [1, 2, 5, 3, 2, 3, 3, 6, 10, 8, 9]
-print("0.- Lista de Numeros:", ListaNumero)
-
-ListaNumeroSet = set(ListaNumero)
-print("1.- Lista sin Duplicados:", ListaNumeroSet)
-
-SumaListaNumeros = sum(ListaNumero)
-print("2.- Suma de los Numeros en Lista:", SumaListaNumeros)
-
-SumaListaNumeroSet = sum(ListaNumeroSet)
-print("3.- Suma de los Numeros en Lista:", SumaListaNumeroSet)
-
-DiccionarioListas = {
-    "len": len(ListaNumeroSet),
-    "sumlista": SumaListaNumeros,
-    "sumaset": SumaListaNumeroSet,
-    "max": max(ListaNumero),
-    "min": min(ListaNumero),
-}
-
-print("Diccionario:", DiccionarioListas)
-
-# Condiciones
-a= 200
-b= 33
-
-if b < a:
-    print("b es mayor que a")
-elif a == b:
-    print("a y b son iguales")
-else:
-    print("a es mayor que b")
-
-# Ciclo while
-
-quiereVolver = True
-vecesRegresaron = 1
-while vecesRegresaron <= 3:
-    vecesRegresaron += 1
-    print(f"Han vuelto {str(vecesRegresaron)} veces")
-
-i = 1
-while i < 6:
-    print(i)
-    if i == 3:
-        break
-    i += 1
-else:
-    print("error")
-
-# Continue
-
-i = 0
-while i < 6:
-    i += 1
-    if i == 3:
-        continue
-    print(i)
-
-# ciclo for - for each
-furtas = ["🍎", "🍌", "🥭"]
-
-# for - Por cada
-# for frutas in frutas:
- #   print(frutas)
-buscar = True
-if buscar:
-    for fruta in furtas:
-        if fruta == "🍌":
-            print("Se encontro:" + fruta)
+# Reglas de gramática y precedencia para el analizador sintáctico
+def p_expresion(p):
+    """
+    expresion : expresion SUMA expresion
+              | expresion RESTA expresion
+              | expresion MULTIPLICACION expresion
+              | expresion DIVISION expresion
+              | PARENTESIS_IZQ expresion PARENTESIS_DER
+              | NUMERO
+    """
+    if len(p) == 2:
+        p[0] = p[1]
+    elif p[1] == '(' and p[3] == ')':
+        p[0] = p[2]
     else:
-        print("No Coincide")
+        if p[2] == '+':
+            p[0] = p[1] + p[3]
+        elif p[2] == '-':
+            p[0] = p[1] - p[3]
+        elif p[2] == '*':
+            p[0] = p[1] * p[3]
+        elif p[2] == '/':
+            if p[3] != 0:
+                p[0] = p[1] / p[3]
+            else:
+                print("División por cero")
+                p[0] = None
 
+# Regla de error para errores sintácticos
+def p_error(p):
+    global imprimir_resultado
+    imprimir_resultado = False
+
+# Construir el lexer
+lexer = lex.lex()
+
+# Construcción del analizador sintáctico
+parser = yacc.yacc()
+
+# Analizando léxicamente la expresión que se ingrese
+def evaluar_lexico(expresion):
+    # Reiniciar la lista antes de cada análisis
+    global caracteres_no_reconocidos
+    caracteres_no_reconocidos = []
+
+    # Ejecutar el lexer
+    lexer.input(expresion)
+
+    # Iterar sobre los tokens
+    for token in lexer:
+        pass  # No es necesario hacer nada aquí
+
+    # Crear cadena de caracteres no reconocidos separados por coma
+    caracteres_concatenados = ",".join(map(str, caracteres_no_reconocidos))
+
+    return caracteres_concatenados
+
+def analizador_sintactico(expresion):
+    # Restablecer la variable de impresión del resultado
+    global imprimir_resultado
+    imprimir_resultado = True
+
+    # Análisis de la expresión de entrada
+    resultado = parser.parse(expresion, lexer=lexer)
+
+    # Imprimir el resultado si se debe
+    if imprimir_resultado:
+        return resultado
+    else:
+        return "Error de sintaxis"
+
+# Construir analizador semántico
+def analizador_semantico(texto):
+    sentiment_analyzer = pipeline('sentiment-analysis',
+                                  model='nlptown/bert-base-multilingual-uncased-sentiment')
+    resultado = sentiment_analyzer(texto)[0]
+    sentimiento = resultado['label']
+    print(f"Sentimiento: {sentimiento} ")
+    return sentimiento
+
+
+# Ruta principal del servidor flask
+@app.route('/', methods=["GET", "POST"])
+@app.route('/index.html', methods=["GET", "POST"])
+def index():
+    if request.method == 'POST':
+        # Cadena de entrada
+        expresion = request.form['lexicalInput']
+    else:
+        expresion = ""
+
+    caracteres_no_reconocidos = evaluar_lexico(expresion)
+
+    # Retornar la cadena al renderizar la plantilla
+    return render_template('index.html', caracteres_no_reconocidos=caracteres_no_reconocidos, expresion=expresion)
+
+
+@app.route('/semantic.html', methods=["GET", "POST"])
+def semantic():
+    if request.method == 'POST':
+        # Cadena de entrada
+        expresion = request.form['semanticInput']
+
+    else:
+        expresion = ""
+
+    sentimiento = analizador_semantico(expresion)
+    return render_template('semantic.html', expresion = expresion, sentimiento = sentimiento)
+
+
+@app.route('/syntax.html', methods=["GET", "POST"])
+def syntax():
+    # Inicialización de variables
+    resultado = ""
+
+    if request.method == 'POST':
+        # Cadena de entrada
+        expresion = request.form['syntaxInput']
+        resultado = analizador_sintactico(expresion)
+    else:
+        expresion = ""
+
+    # Retornar el resultado al renderizar la plantilla
+    return render_template('syntax.html', resultado=resultado, expresion=expresion)
+
+
+if __name__ == '_main_':
+    app.run(port=5000, debug=True)
